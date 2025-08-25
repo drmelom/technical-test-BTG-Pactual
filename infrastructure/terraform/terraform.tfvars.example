@@ -1,0 +1,44 @@
+# Development environment
+environment = "dev"
+project_name = "btg-pactual-funds-dev"
+
+# AWS Configuration
+aws_region = "us-east-1"
+availability_zones = ["us-east-1a", "us-east-1b"]
+
+# Network Configuration
+vpc_cidr = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+
+# EC2 Configuration
+instance_type = "t3.micro"  # Free tier eligible
+min_size = 1
+max_size = 2
+desired_capacity = 1
+
+# Database Configuration
+docdb_instance_class = "db.t3.medium"
+docdb_cluster_size = 1
+docdb_master_username = "btgadmin"
+# docdb_master_password will be provided via command line or environment variable
+
+# Application Configuration
+app_port = 8000
+health_check_path = "/health"
+
+# Email Configuration
+ses_domain = "btgpactual.com"
+notification_email = "admin@btgpactual.com"
+
+# Monitoring Configuration
+enable_monitoring = true
+log_retention_days = 7
+backup_retention_days = 7
+
+# Additional tags
+additional_tags = {
+  Environment = "Development"
+  Team = "Backend"
+  CostCenter = "Engineering"
+}
