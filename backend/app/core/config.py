@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     TWILIO_ACCOUNT_SID: Optional[str] = None
     TWILIO_AUTH_TOKEN: Optional[str] = None
     TWILIO_FROM_PHONE: Optional[str] = None
+    TWILIO_PHONE_NUMBER: Optional[str] = None
 
     # Test Configuration
     TEST_PHONE_NUMBER: Optional[str] = None
