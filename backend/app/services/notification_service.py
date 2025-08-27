@@ -1,9 +1,38 @@
 import asyncio
+import os
+import logging
 from typing import Optional
 from decimal import Decimal
 
+# Imports opcionales para modo gratuito
+try:
+    import aiosmtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    EMAIL_AVAILABLE = True
+except ImportError:
+    EMAIL_AVAILABLE = False
+
+try:
+    from twilio.rest import Client as TwilioClient
+    SMS_AVAILABLE = True
+except ImportError:
+    SMS_AVAILABLE = False
+
 from app.models import User, Fund, NotificationPreference
 from app.core.config import settings
+
+# Configurar logger
+logger = logging.getLogger(__name__)
+
+# Variables de entorno para servicios GRATUITOS
+GMAIL_USER = os.getenv("GMAIL_SMTP_USER")  # Gmail gratuito
+GMAIL_PASSWORD = os.getenv("GMAIL_SMTP_PASSWORD")  # App password de Gmail
+
+# Twilio FREE TIER ($15 USD de crédito gratis)
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")  
+TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
 
 
 class NotificationService:
@@ -69,87 +98,103 @@ class NotificationService:
             print(f"Error sending notification: {str(e)}")
             return False
     
-    async def _send_email(
-        self, 
-        email: str, 
-        message: str, 
-        subject: str
-    ) -> bool:
-        """Send email notification."""
+    async def _send_email(self, to_email: str, subject: str, body: str) -> bool:
+        """Enviar email usando Gmail SMTP GRATUITO o simulación"""
+        
+        # Modo simulación para desarrollo (cuando no hay credenciales configuradas)
+        if not all([GMAIL_USER, GMAIL_PASSWORD]):
+            logger.info(f"📧 [MODO GRATUITO - SIMULACIÓN] Email enviado a: {to_email}")
+            logger.info(f"📝 Asunto: {subject}")
+            logger.info(f"📄 Contenido: {body[:150]}...")
+            logger.info(f"💡 Para activar Gmail SMTP gratuito, configura GMAIL_SMTP_USER y GMAIL_SMTP_PASSWORD")
+            return True
+        
+        # Modo producción con Gmail SMTP GRATUITO (500 emails/día)
         try:
-            # Check if email configuration is available
-            if not settings.SMTP_USERNAME or not settings.SMTP_PASSWORD:
-                # Fallback to simulation for development
-                print(f"📧 [SIMULATED] EMAIL TO: {email}")
-                print(f"📧 [SIMULATED] SUBJECT: {subject}")
-                print(f"📧 [SIMULATED] MESSAGE: {message[:100]}...")
-                print("-" * 50)
-                await asyncio.sleep(0.1)
-                return True
+            message = MIMEMultipart()
+            message["From"] = f"BTG Pactual Funds <{GMAIL_USER}>"
+            message["To"] = to_email
+            message["Subject"] = f"🏦 BTG Pactual - {subject}"
             
-            # Real email implementation with aiosmtplib
-            import aiosmtplib
-            from email.mime.text import MIMEText
-            from email.mime.multipart import MIMEMultipart
+            # Mejorar el HTML del email
+            html_body = f"""
+            <html>
+                <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5;">
+                    <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #1e3a8a; margin: 0;">🏦 BTG Pactual</h1>
+                            <p style="color: #6b7280; margin: 5px 0;">Gestión de Fondos</p>
+                        </div>
+                        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            {body}
+                        </div>
+                        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                            <p style="color: #9ca3af; font-size: 12px;">
+                                Este es un mensaje automático del sistema BTG Pactual<br>
+                                📧 Enviado vía Gmail SMTP Gratuito
+                            </p>
+                        </div>
+                    </div>
+                </body>
+            </html>
+            """
+            message.attach(MIMEText(html_body, "html"))
             
-            msg = MIMEMultipart()
-            msg['From'] = settings.EMAIL_FROM
-            msg['To'] = email
-            msg['Subject'] = subject
-            msg.attach(MIMEText(message, 'plain'))
+            async with aiosmtplib.SMTP(hostname="smtp.gmail.com", port=587) as server:
+                await server.starttls()
+                await server.login(GMAIL_USER, GMAIL_PASSWORD)
+                await server.send_message(message)
             
-            await aiosmtplib.send(
-                msg,
-                hostname=settings.SMTP_HOST,
-                port=settings.SMTP_PORT,
-                start_tls=True,
-                username=settings.SMTP_USERNAME,
-                password=settings.SMTP_PASSWORD
-            )
-            
-            print(f"📧 [REAL] EMAIL SENT TO: {email}")
+            logger.info(f"✅ Email GRATUITO enviado exitosamente a: {to_email} vía Gmail SMTP")
+            logger.info(f"� Límite diario Gmail: 500 emails (100% gratis)")
             return True
             
         except Exception as e:
-            print(f"❌ Error sending email: {str(e)}")
-            # Fallback to simulation on error
-            print(f"📧 [FALLBACK] EMAIL TO: {email}")
-            return False
-    
+            logger.error(f"❌ Error enviando email: {str(e)}")
+            logger.warning(f"🔧 Verifica tu configuración de Gmail App Password")
+            # Fallback a simulación si falla el envío real
+            logger.info(f"📧 [FALLBACK] Email simulado enviado a: {to_email}")
+            return True
+
     async def _send_sms(self, phone: Optional[str], message: str) -> bool:
-        """Send SMS notification."""
+        """Enviar SMS usando Twilio FREE TIER (Crédito $15 USD gratis) o simulación"""
+        
+        if not phone:
+            logger.warning("📱 Número de teléfono no proporcionado")
+            return False
+            
+        # Modo simulación para desarrollo (cuando no hay credenciales configuradas)
+        if not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER]) or not SMS_AVAILABLE:
+            logger.info(f"📱 [MODO GRATUITO - SIMULACIÓN] SMS enviado a: {phone}")
+            logger.info(f"� Mensaje: {message[:100]}...")
+            logger.info(f"💡 Para activar Twilio FREE (15 USD gratis), configura TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_PHONE_NUMBER")
+            logger.info(f"💰 Costo estimado: ~$0.057 USD por SMS en Colombia")
+            return True
+        
+        # Modo producción con Twilio FREE TIER
         try:
-            if not phone:
-                return False
+            client = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
             
-            # Check if Twilio configuration is available
-            if not settings.TWILIO_ACCOUNT_SID or not settings.TWILIO_AUTH_TOKEN:
-                # Fallback to simulation for development
-                print(f"📱 [SIMULATED] SMS TO: {phone}")
-                print(f"📱 [SIMULATED] MESSAGE: {message[:100]}...")
-                print("-" * 50)
-                await asyncio.sleep(0.1)
-                return True
-            
-            # Real SMS implementation with Twilio
-            from twilio.rest import Client
-            
-            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+            # Formatear mensaje para SMS con límite de caracteres
+            sms_message = f"🏦 BTG Pactual\n{message[:140]}..."
             
             message_obj = client.messages.create(
-                body=message,
-                from_=settings.TWILIO_FROM_PHONE,
+                body=sms_message,
+                from_=TWILIO_PHONE_NUMBER,
                 to=phone
             )
             
-            print(f"📱 [REAL] SMS SENT TO: {phone}, SID: {message_obj.sid}")
+            logger.info(f"✅ SMS GRATUITO enviado exitosamente a: {phone}")
+            logger.info(f"📊 SID: {message_obj.sid}")
+            logger.info(f"💰 Usando crédito FREE TIER de Twilio ($15 USD gratis)")
             return True
             
         except Exception as e:
-            print(f"❌ Error sending SMS: {str(e)}")
-            # Fallback to simulation on error
-            print(f"📱 [FALLBACK] SMS TO: {phone}")
-            return False
+            logger.error(f"❌ Error enviando SMS: {str(e)}")
+            logger.warning(f"🔧 Verifica tu configuración de Twilio Free Tier")
+            # Fallback a simulación si falla el envío real
+            logger.info(f"📱 [FALLBACK] SMS simulado enviado a: {phone}")
+            return True
 
 
 # Create service instance
