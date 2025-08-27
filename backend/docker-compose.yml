@@ -43,13 +43,18 @@ services:
       BACKEND_CORS_ORIGINS: '["http://localhost:3000","http://localhost:3001","http://localhost:8080"]'
       
       # Email Configuration (for notifications)
-      SMTP_TLS: true
+      SMTP_TLS: false
+      SMTP_SSL: true
       SMTP_PORT: 587
       SMTP_HOST: smtp.gmail.com
-      SMTP_USER: your-email@gmail.com
-      SMTP_PASSWORD: your-app-password
-      EMAILS_FROM_EMAIL: noreply@btgpactual.com
+      SMTP_USER: gmkronox@gmail.com
+      SMTP_PASSWORD: ecic vogx lqal ukxb
+      EMAILS_FROM_EMAIL: gmkronox@gmail.com
       EMAILS_FROM_NAME: BTG Pactual
+      
+      # Gmail SMTP Configuration (Free Tier)
+      GMAIL_SMTP_USER: gmkronox@gmail.com
+      GMAIL_SMTP_PASSWORD: ecic vogx lqal ukxb
       
       # Twilio Configuration (for SMS)
       TWILIO_ACCOUNT_SID: your-twilio-account-sid
