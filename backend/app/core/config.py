@@ -35,10 +35,17 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     EMAIL_FROM: str = "noreply@btgpactual.com"
 
+    # Gmail SMTP Configuration (Free Tier)
+    GMAIL_SMTP_USER: Optional[str] = None
+    GMAIL_SMTP_PASSWORD: Optional[str] = None
+
     # SMS Configuration (Twilio)
     TWILIO_ACCOUNT_SID: Optional[str] = None
     TWILIO_AUTH_TOKEN: Optional[str] = None
     TWILIO_FROM_PHONE: Optional[str] = None
+
+    # Test Configuration
+    TEST_PHONE_NUMBER: Optional[str] = None
 
     # Business Configuration
     INITIAL_CLIENT_BALANCE: int = 500000  # COP $500.000
