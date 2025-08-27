@@ -1,7 +1,7 @@
 # Configuración súper simple para despliegue BTG Pactual
 # Terraform crea automáticamente el key pair y lee las credenciales del backend/.env
 
-# Repositorio - CAMBIAR URL
+# Repositorio - URL actualizada
 repo_url = "https://github.com/drmelom/technical-test-BTG-Pactual.git"
 
 # Tu IP para SSH (opcional - 0.0.0.0/0 permite desde cualquier IP)

@@ -135,7 +135,7 @@ resource "aws_instance" "btg_app" {
   # Script que copia el .env completo
   user_data = base64encode(templatefile("${path.module}/user_data_complete.sh", {
     repo_url    = var.repo_url
-    env_content = file("${path.module}/../backend/.env")
+    ENV_CONTENT = file("${path.module}/../backend/.env")
   }))
 
   tags = {

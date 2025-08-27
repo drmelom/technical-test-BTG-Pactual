@@ -8,7 +8,7 @@ set -e
 
 # Variables pasadas desde Terraform
 REPO_URL="${repo_url}"
-ENV_CONTENT="${env_content}"
+ENV_CONTENT="${ENV_CONTENT}"
 
 APP_DIR="/home/ec2-user/btg-pactual"
 LOG_FILE="/var/log/btg-deployment.log"
