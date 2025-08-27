@@ -67,14 +67,14 @@ db.createCollection("user_fund_subscriptions", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["user_id", "fund_id", "amount", "is_active"],
+      required: ["user_id", "fund_id", "subscription_amount", "is_active"],
       properties: {
         user_id: { bsonType: "string" },
         fund_id: { bsonType: "string" },
-        amount: { bsonType: "decimal" },
+        subscription_amount: { bsonType: "decimal" },
         is_active: { bsonType: "bool" },
         subscribed_at: { bsonType: "date" },
-        cancelled_at: { bsonType: "date" },
+        cancelled_at: { bsonType: ["date", "null"] },
       },
     },
   },

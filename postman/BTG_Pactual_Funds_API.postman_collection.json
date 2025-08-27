@@ -1,0 +1,984 @@
+{
+	"info": {
+		"_postman_id": "btg-pactual-funds-api",
+		"name": "BTG Pactual - Funds Management API",
+		"description": "Colección de Postman para la API de gestión de fondos de BTG Pactual\n\nEsta colección incluye todos los endpoints necesarios para:\n- Autenticación de usuarios (registro y login)\n- Gestión completa de fondos\n- Suscripción y cancelación de fondos\n- Historial de transacciones\n- Notificaciones automáticas\n- Pruebas automatizadas con validaciones\n- Casos de error y manejo de excepciones\n\n**Configuración inicial:**\n1. Importar el entorno BTG_Pactual_Local_Environment.postman_environment.json\n2. Ejecutar el endpoint de Login para obtener el token JWT\n3. El token se guardará automáticamente en la variable de entorno\n4. Usar los demás endpoints con autenticación automática\n5. Ejecutar la colección completa para pruebas automatizadas\n\n**Variables de entorno necesarias:**\n- base_url: URL base de la API (ej: http://localhost:8000)\n- access_token: Token JWT (se asigna automáticamente al hacer login)\n- user_id: ID del usuario autenticado\n- subscription_id: ID de suscripción para pruebas\n- fund_id: ID de fondo para pruebas\n\n**Autor:** BTG Pactual - Technical Test\n**Versión:** 1.2 - Enhanced with comprehensive testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register Admin User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validaciones de respuesta para registro de admin",
+									"pm.test('Status code is 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.test('Response has user data', function () {",
+									"        pm.expect(response).to.have.property('user');",
+									"        pm.expect(response.user).to.have.property('id');",
+									"        pm.expect(response.user).to.have.property('email');",
+									"        pm.expect(response.user.email).to.equal('admin@btgpactual.com');",
+									"    });",
+									"    ",
+									"    pm.test('Admin user has correct role', function () {",
+									"        pm.expect(response.user).to.have.property('is_admin');",
+									"        pm.expect(response.user.is_admin).to.be.true;",
+									"    });",
+									"    ",
+									"    console.log('✅ Admin user created successfully');",
+									"    pm.environment.set('admin_user_id', response.user.id);",
+									"} else {",
+									"    pm.test('Registration error handled properly', function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([400, 409]);",
+									"    });",
+									"    console.log('❌ Admin registration failed:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@btgpactual.com\",\n    \"password\": \"Admin123!\",\n    \"full_name\": \"BTG Pactual Admin\",\n    \"phone_number\": \"+57300123456\",\n    \"notification_preference\": \"email\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Register Client User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validaciones de respuesta para registro de cliente",
+									"pm.test('Status code is 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.test('Response has user data', function () {",
+									"        pm.expect(response).to.have.property('user');",
+									"        pm.expect(response.user).to.have.property('id');",
+									"        pm.expect(response.user).to.have.property('email');",
+									"        pm.expect(response.user.email).to.equal('client@example.com');",
+									"    });",
+									"    ",
+									"    pm.test('Client user has correct role', function () {",
+									"        pm.expect(response.user).to.have.property('is_admin');",
+									"        pm.expect(response.user.is_admin).to.be.false;",
+									"    });",
+									"    ",
+									"    pm.test('Response has balance information', function () {",
+									"        pm.expect(response.user).to.have.property('balance');",
+									"        pm.expect(response.user.balance).to.equal('500000.00');",
+									"    });",
+									"    ",
+									"    console.log('✅ Client user created successfully');",
+									"    pm.environment.set('client_user_id', response.user.id);",
+									"} else {",
+									"    pm.test('Registration error handled properly', function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([400, 409]);",
+									"    });",
+									"    console.log('❌ Client registration failed:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"client@example.com\",\n    \"password\": \"Client123!\",\n    \"full_name\": \"Juan Pérez\",\n    \"phone_number\": \"+57300654321\",\n    \"notification_preference\": \"email\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Login Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validaciones completas para login de cliente",
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.test('Response has access token', function () {",
+									"        pm.expect(response).to.have.property('access_token');",
+									"        pm.expect(response.access_token).to.be.a('string');",
+									"        pm.expect(response.access_token.length).to.be.greaterThan(10);",
+									"    });",
+									"    ",
+									"    pm.test('Response has token type', function () {",
+									"        pm.expect(response).to.have.property('token_type');",
+									"        pm.expect(response.token_type).to.equal('bearer');",
+									"    });",
+									"    ",
+									"    pm.test('Response has user information', function () {",
+									"        pm.expect(response).to.have.property('user');",
+									"        pm.expect(response.user).to.have.property('id');",
+									"        pm.expect(response.user).to.have.property('email');",
+									"        pm.expect(response.user).to.have.property('full_name');",
+									"        pm.expect(response.user).to.have.property('balance');",
+									"    });",
+									"    ",
+									"    pm.environment.set('access_token', response.access_token);",
+									"    pm.environment.set('user_id', response.user.id);",
+									"    pm.environment.set('user_balance', response.user.balance);",
+									"    ",
+									"    console.log('✅ Login successful, token and user data saved');",
+									"    console.log('User Balance: $' + response.user.balance);",
+									"} else {",
+									"    pm.test('Login error handled properly', function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([400, 401, 422]);",
+									"    });",
+									"    console.log('❌ Login failed:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"client@example.com\",\n    \"password\": \"Client123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('access_token', response.access_token);",
+									"    pm.environment.set('user_id', response.user.id);",
+									"    console.log('Admin login successful, token saved');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin@btgpactual.com\",\n    \"password\": \"Admin123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			}
+		},
+		{
+			"name": "User Profile",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/v1/users/me",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"me"
+					]
+				}
+			}
+		},
+		{
+			"name": "Funds Management",
+			"item": [
+				{
+					"name": "List All Funds",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/funds/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"funds",
+								""
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Fund by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/funds/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"funds",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Funds by Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/funds/category/FPV",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"funds",
+								"category",
+								"FPV"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "Subscribe to Fund - FPV_BTG_PACTUAL_RECAUDADORA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('subscription_id', response.subscription_id);",
+									"    console.log('Subscription successful:', response.message);",
+									"} else {",
+									"    console.log('Subscription failed:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fund_id\": 1,\n    \"amount\": 75000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/subscribe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"subscribe"
+							]
+						}
+					}
+				},
+				{
+					"name": "Subscribe to Fund - DEUDAPRIVADA",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fund_id\": 3,\n    \"amount\": 100000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/subscribe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"subscribe"
+							]
+						}
+					}
+				},
+				{
+					"name": "Subscribe to Fund - Insufficient Balance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 400 for insufficient balance', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test('Should contain insufficient balance message', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.detail).to.include('No tiene saldo disponible');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fund_id\": 4,\n    \"amount\": 500000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/subscribe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"subscribe"
+							]
+						}
+					}
+				},
+				{
+					"name": "Cancel Fund Subscription",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validaciones para cancelación de suscripción",
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.test('Response has success message', function () {",
+									"        pm.expect(response).to.have.property('message');",
+									"        pm.expect(response.message).to.include('cancelación');",
+									"    });",
+									"    ",
+									"    pm.test('Response has transaction details', function () {",
+									"        pm.expect(response).to.have.property('transaction_id');",
+									"        pm.expect(response).to.have.property('refund_amount');",
+									"    });",
+									"    ",
+									"    console.log('✅ Fund subscription cancelled successfully');",
+									"} else {",
+									"    console.log('❌ Cancellation failed:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subscription_id\": \"{{subscription_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"cancel"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Transaction History",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validaciones para historial de transacciones",
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.test('Response has transactions array', function () {",
+									"        pm.expect(response).to.have.property('transactions');",
+									"        pm.expect(response.transactions).to.be.an('array');",
+									"    });",
+									"    ",
+									"    pm.test('Response has pagination info', function () {",
+									"        pm.expect(response).to.have.property('total');",
+									"        pm.expect(response).to.have.property('limit');",
+									"        pm.expect(response).to.have.property('offset');",
+									"    });",
+									"    ",
+									"    if (response.transactions.length > 0) {",
+									"        pm.test('Transaction has required fields', function () {",
+									"            const transaction = response.transactions[0];",
+									"            pm.expect(transaction).to.have.property('id');",
+									"            pm.expect(transaction).to.have.property('type');",
+									"            pm.expect(transaction).to.have.property('amount');",
+									"            pm.expect(transaction).to.have.property('created_at');",
+									"        });",
+									"    }",
+									"    ",
+									"    console.log('✅ Transaction history retrieved successfully');",
+									"    console.log('Total transactions:', response.total);",
+									"} else {",
+									"    console.log('❌ Failed to get transaction history:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/history?limit=10&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"history"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Transaction History by Fund",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/history?fund_id=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"history"
+							],
+							"query": [
+								{
+									"key": "fund_id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Error Handling Tests",
+			"item": [
+				{
+					"name": "Login with Invalid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validar manejo de credenciales inválidas",
+									"pm.test('Status code is 401 Unauthorized', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('Response has error message', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('detail');",
+									"});",
+									"",
+									"console.log('✅ Invalid credentials handled correctly');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"invalid@example.com\",\n    \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Access Protected Route Without Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validar protección de rutas sin autenticación",
+									"pm.test('Status code is 401 Unauthorized', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('Response has authentication error', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('detail');",
+									"});",
+									"",
+									"console.log('✅ Protected route correctly requires authentication');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"me"
+							]
+						}
+					}
+				},
+				{
+					"name": "Subscribe with Insufficient Funds",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validar manejo de fondos insuficientes",
+									"pm.test('Status code is 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test('Response has insufficient funds error', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('detail');",
+									"    pm.expect(response.detail).to.include('fondos insuficientes');",
+									"});",
+									"",
+									"console.log('✅ Insufficient funds error handled correctly');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fund_id\": 1,\n    \"amount\": 999999999\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/subscribe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"subscribe"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Non-Existent Fund",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validar manejo de recurso no encontrado",
+									"pm.test('Status code is 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test('Response has not found error', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('detail');",
+									"});",
+									"",
+									"console.log('✅ Non-existent resource error handled correctly');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/funds/99999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"funds",
+								"99999"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}

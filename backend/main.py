@@ -1,12 +1,17 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
+import logging
+import sys
+import json
 from decimal import InvalidOperation
 
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse as BaseJSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.encoders import jsonable_encoder
+
+from app.api.v1 import api_router
 from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
-from app.core.middleware import LoggingMiddleware, SecurityHeadersMiddleware, setup_cors, setup_logging
 from app.core.exceptions import (
     BTGPactualException,
     btg_pactual_exception_handler,
@@ -15,36 +20,40 @@ from app.core.exceptions import (
     general_exception_handler,
     decimal_exception_handler
 )
-from app.api.v1 import api_router
+from app.core.middleware import SecurityHeadersMiddleware, LoggingMiddleware, setup_cors
+from app.core.json_encoder import CustomJSONEncoder
+
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, settings.LOG_LEVEL.upper()),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
+
+logger = logging.getLogger(__name__)
 
 
-# Setup logging
-setup_logging()
+# Custom JSON Response class
+class CustomJSONResponse(BaseJSONResponse):
+    def render(self, content) -> bytes:
+        return json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=None,
+            separators=(",", ":"),
+            cls=CustomJSONEncoder,
+        ).encode("utf-8")
 
-# Create FastAPI app
+
+# Create FastAPI application with custom JSON encoder
 app = FastAPI(
-    title="BTG Pactual - Funds Management API",
-    description="""
-    Sistema de gestión de fondos de BTG Pactual
-    
-    ## Funcionalidades principales:
-    - 🔐 Autenticación y autorización de usuarios
-    - 💰 Suscripción y cancelación de fondos de inversión
-    - 📊 Consulta de historial de transacciones
-    - 📱 Sistema de notificaciones
-    
-    ## Roles de usuario:
-    - **Admin**: Acceso completo al sistema
-    - **Client**: Operaciones de fondos y consultas
-    
-    ## Autenticación:
-    - Utiliza JWT tokens para autenticación
-    - Header: `Authorization: Bearer <token>`
-    """,
-    version="1.0.0",
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.ENVIRONMENT != "production" else None,
     docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
-    openapi_url="/openapi.json" if settings.ENVIRONMENT != "production" else None,
+    default_response_class=CustomJSONResponse,
 )
 
 # Setup CORS

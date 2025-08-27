@@ -13,13 +13,13 @@ class SubscriptionRepository:
     async def create(
         self,
         user_id: str,
-        fund_id: int,
+        fund_id: int,  # Accept int but convert to string
         subscription_amount: float
     ) -> UserFundSubscription:
         """Create a new subscription."""
         subscription = UserFundSubscription(
             user_id=user_id,
-            fund_id=fund_id,
+            fund_id=str(fund_id),  # Convert to string for MongoDB compatibility
             subscription_amount=subscription_amount,
             is_active=True
         )
@@ -29,12 +29,12 @@ class SubscriptionRepository:
     async def get_by_user_and_fund(
         self, 
         user_id: str, 
-        fund_id: int
+        fund_id: int  # Accept int but convert to string
     ) -> Optional[UserFundSubscription]:
         """Get subscription by user and fund."""
         return await UserFundSubscription.find_one(
             UserFundSubscription.user_id == user_id,
-            UserFundSubscription.fund_id == fund_id,
+            UserFundSubscription.fund_id == str(fund_id),  # Convert to string for comparison
             UserFundSubscription.is_active == True
         )
     
@@ -53,25 +53,28 @@ class SubscriptionRepository:
         # Enrich with fund data
         result = []
         for subscription in subscriptions:
-            fund = await fund_repository.get_by_id(subscription.fund_id)
-            if fund:
-                result.append({
-                    "id": str(subscription.id),
-                    "user_id": subscription.user_id,
-                    "fund_id": subscription.fund_id,
-                    "fund_name": fund.name,
-                    "subscription_amount": subscription.subscription_amount,
-                    "is_active": subscription.is_active,
-                    "subscribed_at": subscription.subscribed_at,
-                    "cancelled_at": subscription.cancelled_at
-                })
+            # Convert string fund_id back to int for fund lookup
+            fund_id_int = int(subscription.fund_id) if subscription.fund_id.isdigit() else None
+            if fund_id_int:
+                fund = await fund_repository.get_by_id(fund_id_int)
+                if fund:
+                    result.append({
+                        "id": str(subscription.id),
+                        "user_id": subscription.user_id,
+                        "fund_id": subscription.fund_id,
+                        "fund_name": fund.name,
+                        "subscription_amount": subscription.subscription_amount,
+                        "is_active": subscription.is_active,
+                        "subscribed_at": subscription.subscribed_at,
+                        "cancelled_at": subscription.cancelled_at
+                    })
         
         return result
     
     async def cancel_subscription(
         self, 
         user_id: str, 
-        fund_id: int
+        fund_id: int  # Accept int but convert to string
     ) -> Optional[UserFundSubscription]:
         """Cancel user subscription to fund."""
         subscription = await self.get_by_user_and_fund(user_id, fund_id)
@@ -85,11 +88,11 @@ class SubscriptionRepository:
     
     async def get_fund_subscriptions(
         self, 
-        fund_id: int,
+        fund_id: int,  # Accept int but convert to string
         is_active: Optional[bool] = True
     ) -> List[UserFundSubscription]:
         """Get all subscriptions for a fund."""
-        query = {"fund_id": fund_id}
+        query = {"fund_id": str(fund_id)}  # Convert to string for query
         if is_active is not None:
             query["is_active"] = is_active
         
@@ -97,11 +100,11 @@ class SubscriptionRepository:
     
     async def count_fund_subscriptions(
         self, 
-        fund_id: int,
+        fund_id: int,  # Accept int but convert to string
         is_active: Optional[bool] = True
     ) -> int:
         """Count subscriptions for a fund."""
-        query = {"fund_id": fund_id}
+        query = {"fund_id": str(fund_id)}  # Convert to string for query
         if is_active is not None:
             query["is_active"] = is_active
         

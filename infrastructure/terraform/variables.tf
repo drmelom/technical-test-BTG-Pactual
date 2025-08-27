@@ -123,6 +123,53 @@ variable "health_check_path" {
   default     = "/health"
 }
 
+# ECS Configuration
+variable "app_image" {
+  description = "Docker image for the application"
+  type        = string
+  default     = "btg-pactual-funds:latest"
+}
+
+variable "ecs_cpu" {
+  description = "CPU units for ECS task"
+  type        = number
+  default     = 512
+  
+  validation {
+    condition = contains([256, 512, 1024, 2048, 4096], var.ecs_cpu)
+    error_message = "ECS CPU must be 256, 512, 1024, 2048, or 4096."
+  }
+}
+
+variable "ecs_memory" {
+  description = "Memory (MB) for ECS task"
+  type        = number
+  default     = 1024
+  
+  validation {
+    condition = var.ecs_memory >= 512 && var.ecs_memory <= 30720
+    error_message = "ECS memory must be between 512 and 30720 MB."
+  }
+}
+
+variable "ecs_desired_count" {
+  description = "Desired number of ECS tasks"
+  type        = number
+  default     = 2
+}
+
+variable "ecs_min_capacity" {
+  description = "Minimum number of ECS tasks for auto scaling"
+  type        = number
+  default     = 1
+}
+
+variable "ecs_max_capacity" {
+  description = "Maximum number of ECS tasks for auto scaling"
+  type        = number
+  default     = 10
+}
+
 # Domain and SSL Configuration
 variable "domain_name" {
   description = "Domain name for the application"

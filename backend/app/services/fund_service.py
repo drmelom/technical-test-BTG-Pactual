@@ -132,9 +132,15 @@ class FundService:
                     TransactionStatus.FAILED
                 )
             
+            # Log the actual error for debugging
+            print(f"Error in subscribe_to_fund: {str(e)}")
+            print(f"Error type: {type(e)}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to process subscription"
+                detail=f"Failed to process subscription: {str(e)}"
             )
     
     async def cancel_subscription(self, user_id: str, fund_id: int) -> dict:

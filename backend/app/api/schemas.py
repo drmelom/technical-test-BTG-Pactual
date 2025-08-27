@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any
 from decimal import Decimal
 
 from pydantic import BaseModel, Field, EmailStr, validator
+from bson import ObjectId
 
 from app.models import (
     UserRole, 
@@ -70,6 +71,13 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True
         populate_by_name = True
+        arbitrary_types_allowed = True
+    
+    @validator("id", pre=True)
+    def convert_object_id(cls, v):
+        if hasattr(v, '__str__'):
+            return str(v)
+        return v
 
 
 class UserLogin(BaseModel):
@@ -120,30 +128,37 @@ class FundResponse(FundBase):
     class Config:
         from_attributes = True
         populate_by_name = True
+        arbitrary_types_allowed = True
+    
+    @validator("id", pre=True)
+    def convert_object_id(cls, v):
+        if hasattr(v, '__str__'):
+            return str(v)
+        return v
 
 
 # Transaction Schemas
 class TransactionBase(BaseModel):
     fund_id: int = Field(..., gt=0)
-    transaction_type: TransactionType
+    type: TransactionType  # Changed from transaction_type to match MongoDB schema
 
 
 class SubscriptionRequest(TransactionBase):
     amount: Decimal = Field(..., gt=0)
-    transaction_type: TransactionType = TransactionType.SUBSCRIPTION
+    type: TransactionType = TransactionType.SUBSCRIPTION  # Changed from transaction_type
 
 
 class CancellationRequest(BaseModel):
     fund_id: int = Field(..., gt=0)
-    transaction_type: TransactionType = TransactionType.CANCELLATION
+    type: TransactionType = TransactionType.CANCELLATION  # Changed from transaction_type
 
 
 class TransactionResponse(BaseModel):
     id: str = Field(..., alias="_id")
     transaction_id: str
     user_id: str
-    fund_id: int
-    transaction_type: TransactionType
+    fund_id: str  # Changed to string to match MongoDB schema
+    type: TransactionType  # Changed from transaction_type
     amount: Decimal
     status: TransactionStatus
     description: Optional[str] = None
@@ -154,6 +169,13 @@ class TransactionResponse(BaseModel):
     class Config:
         from_attributes = True
         populate_by_name = True
+        arbitrary_types_allowed = True
+    
+    @validator("id", pre=True)
+    def convert_object_id(cls, v):
+        if hasattr(v, '__str__'):
+            return str(v)
+        return v
 
 
 class TransactionHistoryResponse(BaseModel):
@@ -178,13 +200,20 @@ class UserFundSubscriptionResponse(BaseModel):
     class Config:
         from_attributes = True
         populate_by_name = True
+        arbitrary_types_allowed = True
+    
+    @validator("id", pre=True)
+    def convert_object_id(cls, v):
+        if hasattr(v, '__str__'):
+            return str(v)
+        return v
 
 
 # API Response Schemas
 class APIResponse(BaseModel):
     success: bool = True
     message: str
-    data: Optional[dict] = None
+    data: Optional[Any] = None
 
 
 class ErrorResponse(BaseModel):

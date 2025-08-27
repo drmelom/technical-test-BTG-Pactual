@@ -16,13 +16,17 @@ from app.services.fund_service import fund_service
 router = APIRouter()
 
 
-@router.get("/", response_model=List[FundResponse])
+@router.get("/", response_model=APIResponse)
 async def get_funds(
     current_user: User = Depends(get_current_active_user)
 ):
     """Get all available funds."""
     funds = await fund_service.get_all_funds(is_active=True)
-    return funds
+    return APIResponse(
+        success=True,
+        message="Funds retrieved successfully",
+        data=funds
+    )
 
 
 @router.get("/{fund_id}", response_model=FundResponse)

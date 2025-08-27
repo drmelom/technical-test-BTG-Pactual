@@ -18,7 +18,7 @@ class TransactionRepository:
     async def create(
         self,
         user_id: str,
-        fund_id: int,
+        fund_id: int,  # Accept int but convert to string
         transaction_type: TransactionType,
         amount: Decimal,
         description: Optional[str] = None
@@ -27,8 +27,8 @@ class TransactionRepository:
         transaction = Transaction(
             transaction_id=self._generate_transaction_id(),
             user_id=user_id,
-            fund_id=fund_id,
-            transaction_type=transaction_type,
+            fund_id=str(fund_id),  # Convert to string for MongoDB
+            type=transaction_type,  # Use 'type' instead of 'transaction_type'
             amount=amount,
             description=description,
             status=TransactionStatus.PENDING
@@ -78,7 +78,7 @@ class TransactionRepository:
         query = {"user_id": user_id}
         
         if transaction_type:
-            query["transaction_type"] = transaction_type
+            query["type"] = transaction_type  # Use 'type' instead of 'transaction_type'
         
         if status:
             query["status"] = status
@@ -99,7 +99,7 @@ class TransactionRepository:
         query = {"user_id": user_id}
         
         if transaction_type:
-            query["transaction_type"] = transaction_type
+            query["type"] = transaction_type  # Use 'type' instead of 'transaction_type'
         
         if status:
             query["status"] = status
@@ -113,7 +113,7 @@ class TransactionRepository:
         limit: int = 10
     ) -> List[Transaction]:
         """Get fund transactions with pagination."""
-        return await Transaction.find(Transaction.fund_id == fund_id)\
+        return await Transaction.find(Transaction.fund_id == str(fund_id))\
             .sort(-Transaction.created_at)\
             .skip(skip)\
             .limit(limit)\

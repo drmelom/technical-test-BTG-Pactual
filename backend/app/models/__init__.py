@@ -1,11 +1,12 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Any
 from decimal import Decimal
 
 from beanie import Document, Indexed
 from pydantic import BaseModel, Field, validator
 from pymongo import IndexModel, ASCENDING, DESCENDING
+from bson import Decimal128, ObjectId
 
 
 class UserRole(str, Enum):
@@ -66,6 +67,8 @@ class User(Document):
     def validate_balance(cls, v):
         if isinstance(v, (int, float)):
             return Decimal(str(v))
+        elif isinstance(v, Decimal128):
+            return Decimal(str(v))
         return v
 
 
@@ -93,6 +96,8 @@ class Fund(Document):
     def validate_minimum_amount(cls, v):
         if isinstance(v, (int, float)):
             return Decimal(str(v))
+        elif isinstance(v, Decimal128):
+            return Decimal(str(v))
         return v
 
 
@@ -101,8 +106,8 @@ class Transaction(Document):
     
     transaction_id: Indexed(str, unique=True) = Field(..., description="Unique transaction ID")
     user_id: Indexed(str) = Field(..., description="User ID who made the transaction")
-    fund_id: int = Field(..., description="Fund ID")
-    transaction_type: TransactionType = Field(..., description="Transaction type")
+    fund_id: str = Field(..., description="Fund ID as string to match MongoDB schema")
+    type: TransactionType = Field(..., description="Transaction type (matches MongoDB schema)")
     amount: Decimal = Field(..., description="Transaction amount in COP")
     status: TransactionStatus = Field(
         default=TransactionStatus.PENDING,
@@ -127,14 +132,21 @@ class Transaction(Document):
     def validate_amount(cls, v):
         if isinstance(v, (int, float)):
             return Decimal(str(v))
+        elif isinstance(v, Decimal128):
+            return Decimal(str(v))
         return v
+    
+    @validator("fund_id", pre=True)
+    def validate_fund_id(cls, v):
+        # Convert int fund_id to string for MongoDB compatibility
+        return str(v)
 
 
 class UserFundSubscription(Document):
     """Model to track user subscriptions to funds"""
     
     user_id: Indexed(str) = Field(..., description="User ID")
-    fund_id: Indexed(int) = Field(..., description="Fund ID")
+    fund_id: str = Field(..., description="Fund ID as string to match MongoDB schema")
     subscription_amount: Decimal = Field(..., description="Current subscription amount")
     is_active: bool = Field(default=True, description="Subscription status")
     subscribed_at: datetime = Field(default_factory=datetime.utcnow)
@@ -153,7 +165,14 @@ class UserFundSubscription(Document):
     def validate_subscription_amount(cls, v):
         if isinstance(v, (int, float)):
             return Decimal(str(v))
+        elif isinstance(v, Decimal128):
+            return Decimal(str(v))
         return v
+    
+    @validator("fund_id", pre=True)
+    def validate_fund_id(cls, v):
+        # Convert int fund_id to string for MongoDB compatibility
+        return str(v)
 
 
 # Initialize default funds data

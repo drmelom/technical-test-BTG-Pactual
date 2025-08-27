@@ -17,6 +17,31 @@ from app.services.fund_service import fund_service
 router = APIRouter()
 
 
+@router.get("/me", response_model=APIResponse)
+async def get_current_user(
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get current user information."""
+    user_data = {
+        "id": str(current_user.id),
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "phone": current_user.phone,
+        "role": current_user.role,
+        "current_balance": str(current_user.current_balance),
+        "notification_preference": current_user.notification_preference,
+        "is_active": current_user.is_active,
+        "created_at": current_user.created_at.isoformat(),
+        "updated_at": current_user.updated_at.isoformat()
+    }
+    
+    return APIResponse(
+        success=True,
+        message="User profile retrieved successfully",
+        data=user_data
+    )
+
+
 @router.get("/profile", response_model=UserResponse)
 async def get_profile(
     current_user: User = Depends(get_current_active_user)

@@ -77,21 +77,43 @@ class NotificationService:
     ) -> bool:
         """Send email notification."""
         try:
-            # In a real implementation, you would use aiosmtplib or similar
-            # For now, we'll simulate the email sending
+            # Check if email configuration is available
+            if not settings.SMTP_USERNAME or not settings.SMTP_PASSWORD:
+                # Fallback to simulation for development
+                print(f"📧 [SIMULATED] EMAIL TO: {email}")
+                print(f"📧 [SIMULATED] SUBJECT: {subject}")
+                print(f"📧 [SIMULATED] MESSAGE: {message[:100]}...")
+                print("-" * 50)
+                await asyncio.sleep(0.1)
+                return True
             
-            print(f"📧 EMAIL SENT TO: {email}")
-            print(f"📧 SUBJECT: {subject}")
-            print(f"📧 MESSAGE: {message}")
-            print("-" * 50)
+            # Real email implementation with aiosmtplib
+            import aiosmtplib
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
             
-            # Simulate async email sending delay
-            await asyncio.sleep(0.1)
+            msg = MIMEMultipart()
+            msg['From'] = settings.EMAIL_FROM
+            msg['To'] = email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(message, 'plain'))
             
+            await aiosmtplib.send(
+                msg,
+                hostname=settings.SMTP_HOST,
+                port=settings.SMTP_PORT,
+                start_tls=True,
+                username=settings.SMTP_USERNAME,
+                password=settings.SMTP_PASSWORD
+            )
+            
+            print(f"📧 [REAL] EMAIL SENT TO: {email}")
             return True
             
         except Exception as e:
-            print(f"Error sending email: {str(e)}")
+            print(f"❌ Error sending email: {str(e)}")
+            # Fallback to simulation on error
+            print(f"📧 [FALLBACK] EMAIL TO: {email}")
             return False
     
     async def _send_sms(self, phone: Optional[str], message: str) -> bool:
@@ -100,20 +122,33 @@ class NotificationService:
             if not phone:
                 return False
             
-            # In a real implementation, you would use Twilio or similar
-            # For now, we'll simulate the SMS sending
+            # Check if Twilio configuration is available
+            if not settings.TWILIO_ACCOUNT_SID or not settings.TWILIO_AUTH_TOKEN:
+                # Fallback to simulation for development
+                print(f"📱 [SIMULATED] SMS TO: {phone}")
+                print(f"📱 [SIMULATED] MESSAGE: {message[:100]}...")
+                print("-" * 50)
+                await asyncio.sleep(0.1)
+                return True
             
-            print(f"📱 SMS SENT TO: {phone}")
-            print(f"📱 MESSAGE: {message}")
-            print("-" * 50)
+            # Real SMS implementation with Twilio
+            from twilio.rest import Client
             
-            # Simulate async SMS sending delay
-            await asyncio.sleep(0.1)
+            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
             
+            message_obj = client.messages.create(
+                body=message,
+                from_=settings.TWILIO_FROM_PHONE,
+                to=phone
+            )
+            
+            print(f"📱 [REAL] SMS SENT TO: {phone}, SID: {message_obj.sid}")
             return True
             
         except Exception as e:
-            print(f"Error sending SMS: {str(e)}")
+            print(f"❌ Error sending SMS: {str(e)}")
+            # Fallback to simulation on error
+            print(f"📱 [FALLBACK] SMS TO: {phone}")
             return False
 
 
