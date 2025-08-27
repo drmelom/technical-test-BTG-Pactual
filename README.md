@@ -6,7 +6,7 @@
 [![Database](https://img.shields.io/badge/Database-MongoDB-darkgreen)](http://18.205.222.251:8081)
 
 > **🚀 Aplicación DESPLEGADA y FUNCIONANDO en AWS EC2**  
-> Sistema completo de gestión de fondos de inversión con autenticación JWT, notificaciones automáticas por email/SMS, y arquitectura basada en microservicios con FastAPI y MongoDB.
+> Sistema completo de gestión de fondos de inversión con FastAPI, MongoDB, notificaciones automáticas (Gmail + Twilio), y despliegue automatizado con Terraform.
 
 ---
 
@@ -23,13 +23,142 @@
 
 ### ⚡ **Verificación Rápida:**
 ```bash
-# Verificar que la API está funcionando
 curl http://18.205.222.251:8000/health
-# Respuesta esperada: {"status":"healthy","timestamp":"..."}
-
-# Verificar endpoints principales
-curl http://18.205.222.251:8000/api/v1/funds/ | head -5
+# Respuesta: {"status":"healthy","timestamp":"..."}
 ```
+
+---
+
+## 🛠️ **TECNOLOGÍAS UTILIZADAS**
+
+### **Backend & Base de Datos**
+- **Framework:** FastAPI (Python 3.9+)
+- **Base de Datos:** MongoDB 5.0 con Motor (ODM async)
+- **Autenticación:** JWT + bcrypt
+- **Validación:** Pydantic schemas
+- **Testing:** pytest + httpx
+
+### **Notificaciones**
+- **📧 Email:** Gmail SMTP (gmkronox@gmail.com)
+- **📱 SMS:** Twilio API (+18573808541)
+- **⚙️ Configuración:** Variables de entorno seguras
+
+### **Infraestructura & DevOps**
+- **☁️ Cloud:** AWS EC2 t3.micro (Free Tier)
+- **🏗️ IaC:** Terraform para automatización
+- **📦 Containerización:** Docker + Docker Compose
+- **🔄 Proxy:** Nginx (configurado)
+- **📊 Monitoreo:** Health checks + logging
+
+---
+
+## 📧 **SISTEMA DE NOTIFICACIONES**
+
+### **Configuración Automática**
+El sistema envía notificaciones automáticas en las siguientes situaciones:
+
+| **Evento** | **Canal** | **Destinatario** | **Contenido** |
+|------------|-----------|------------------|---------------|
+| **Suscripción Exitosa** | 📧 Email | Usuario registrado | Confirmación de suscripción + detalles del fondo |
+| **Cancelación de Suscripción** | 📱 SMS | Teléfono del usuario | Alerta de cancelación + ID de transacción |
+| **Fondos Insuficientes** | 📧 Email | Usuario | Notificación de error + balance disponible |
+
+### **Configuración Técnica**
+```python
+# Email (Gmail SMTP)
+GMAIL_USER = "gmkronox@gmail.com"
+GMAIL_APP_PASSWORD = "***" # Variable de entorno
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+
+# SMS (Twilio)
+TWILIO_ACCOUNT_SID = "***" # Variable de entorno  
+TWILIO_AUTH_TOKEN = "***" # Variable de entorno
+TWILIO_FROM_NUMBER = "+18573808541"
+```
+
+### **Ejemplos de Notificaciones**
+- **📧 Email de Suscripción:** "¡Suscripción exitosa! Te has suscrito al fondo FPV_BTG_PACTUAL_RECAUDADORA por $75,000 COP"
+- **📱 SMS de Cancelación:** "BTG Pactual: Suscripción cancelada. ID: 67d1f2a8b... Balance disponible: $425,000"
+
+---
+
+## 💾 **CONSULTAS SQL (Parte 2)**
+
+### **Modelo de Datos PostgreSQL**
+Implementación adicional según especificaciones del ejercicio:
+
+```sql
+-- Base de datos y esquema
+CREATE DATABASE BTG;
+CREATE SCHEMA btg AUTHORIZATION postgres;
+
+-- Tablas principales
+CREATE TABLE btg.cliente (
+    id_cliente SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE btg.sucursal (
+    id_sucursal SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    direccion VARCHAR(200)
+);
+
+CREATE TABLE btg.producto (
+    id_producto SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    categoria VARCHAR(50) NOT NULL
+);
+
+-- Relaciones many-to-many
+CREATE TABLE btg.cliente_producto (
+    id_cliente INT REFERENCES btg.cliente(id_cliente),
+    id_producto INT REFERENCES btg.producto(id_producto),
+    fecha_inscripcion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_cliente, id_producto)
+);
+
+CREATE TABLE btg.cliente_sucursal (
+    id_cliente INT REFERENCES btg.cliente(id_cliente),
+    id_sucursal INT REFERENCES btg.sucursal(id_sucursal),
+    PRIMARY KEY (id_cliente, id_sucursal)
+);
+
+CREATE TABLE btg.sucursal_producto (
+    id_sucursal INT REFERENCES btg.sucursal(id_sucursal),
+    id_producto INT REFERENCES btg.producto(id_producto),
+    PRIMARY KEY (id_sucursal, id_producto)
+);
+```
+
+### **📊 Consulta SQL Compleja**
+**Objetivo:** Encontrar clientes inscritos en productos que están disponibles en TODAS las sucursales que visita el cliente.
+
+```sql
+SELECT DISTINCT c.nombre
+FROM btg.cliente c
+JOIN btg.cliente_producto cp ON c.id_cliente = cp.id_cliente
+JOIN btg.producto p ON cp.id_producto = p.id_producto
+JOIN btg.cliente_sucursal cs ON c.id_cliente = cs.id_cliente
+JOIN btg.sucursal_producto sp ON p.id_producto = sp.id_producto
+                              AND cs.id_sucursal = sp.id_sucursal
+WHERE NOT EXISTS (
+    -- Excluir productos que no están en alguna sucursal que visita el cliente
+    SELECT 1
+    FROM btg.cliente_sucursal cs2
+    WHERE cs2.id_cliente = c.id_cliente
+      AND NOT EXISTS (
+          SELECT 1
+          FROM btg.sucursal_producto sp2
+          WHERE sp2.id_producto = p.id_producto
+            AND sp2.id_sucursal = cs2.id_sucursal
+      )
+);
+```
+
+**Explicación:** Esta consulta utiliza `NOT EXISTS` con subconsultas para encontrar clientes que solo están inscritos en productos disponibles en todas sus sucursales visitadas.
 
 ---
 
