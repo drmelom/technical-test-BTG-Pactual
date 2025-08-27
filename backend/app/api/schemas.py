@@ -18,11 +18,11 @@ from app.models import (
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str = Field(..., min_length=2, max_length=100)
-    phone: Optional[str] = None
+    phone_number: Optional[str] = None
     notification_preference: NotificationPreference = NotificationPreference.EMAIL
 
-    @validator("phone")
-    def validate_phone(cls, v):
+    @validator("phone_number")
+    def validate_phone_number(cls, v):
         if v is not None:
             import re
             if not re.match(r'^\+?[1-9]\d{1,14}$', v):
@@ -32,6 +32,9 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=100)
+
+    class Config:
+        extra = "forbid"  # Prohibir propiedades adicionales
 
     @validator("password")
     def validate_password(cls, v):
@@ -48,11 +51,14 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = Field(None, min_length=2, max_length=100)
-    phone: Optional[str] = None
+    phone_number: Optional[str] = None
     notification_preference: Optional[NotificationPreference] = None
 
-    @validator("phone")
-    def validate_phone(cls, v):
+    class Config:
+        extra = "forbid"  # Prohibir propiedades adicionales
+
+    @validator("phone_number")
+    def validate_phone_number(cls, v):
         if v is not None:
             import re
             if not re.match(r'^\+?[1-9]\d{1,14}$', v):

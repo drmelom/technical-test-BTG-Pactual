@@ -26,7 +26,7 @@ async def get_current_user(
         "id": str(current_user.id),
         "email": current_user.email,
         "full_name": current_user.full_name,
-        "phone": current_user.phone,
+        "phone_number": current_user.phone_number,
         "role": current_user.role,
         "current_balance": str(current_user.current_balance),
         "notification_preference": current_user.notification_preference,

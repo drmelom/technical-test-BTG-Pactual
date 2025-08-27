@@ -1,5 +1,6 @@
 from typing import Optional
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 from fastapi import HTTPException, status
 
@@ -23,14 +24,16 @@ class AuthService:
             )
         
         try:
-            user = await user_repository.create(
+            # Create user using repository
+            created_user = await user_repository.create(
                 email=user_data.email,
                 password=user_data.password,
                 full_name=user_data.full_name,
-                phone=user_data.phone,
-                notification_preference=user_data.notification_preference
+                phone_number=user_data.phone_number,
+                notification_preference=user_data.notification_preference.value
             )
-            return user
+            return created_user
+            
         except ValueError as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

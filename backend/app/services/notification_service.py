@@ -87,10 +87,13 @@ class NotificationService:
             if user.notification_preference == NotificationPreference.EMAIL:
                 return await self._send_email(user.email, message, subject)
             elif user.notification_preference == NotificationPreference.SMS:
-                return await self._send_sms(user.phone, message)
+                if not user.phone_number:
+                    logger.warning("📱 Número de teléfono no proporcionado")
+                    return False
+                return await self._send_sms(user.phone_number, message)
             elif user.notification_preference == NotificationPreference.BOTH:
                 email_sent = await self._send_email(user.email, message, subject)
-                sms_sent = await self._send_sms(user.phone, message)
+                sms_sent = await self._send_sms(user.phone_number, message)
                 return email_sent or sms_sent  # Success if at least one succeeds
             
             return False

@@ -17,7 +17,7 @@ class UserRepository:
         email: str, 
         password: str, 
         full_name: str,
-        phone: Optional[str] = None,
+        phone_number: Optional[str] = None,
         notification_preference: str = "email"
     ) -> User:
         """Create a new user."""
@@ -27,7 +27,7 @@ class UserRepository:
                 email=email,
                 hashed_password=hashed_password,
                 full_name=full_name,
-                phone=phone,
+                phone_number=phone_number,
                 notification_preference=notification_preference,
                 role=UserRole.CLIENT,
                 current_balance=Decimal("500000")  # Initial balance COP $500.000

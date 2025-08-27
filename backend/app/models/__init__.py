@@ -42,7 +42,7 @@ class User(Document):
     email: Indexed(str, unique=True) = Field(..., description="User email")
     hashed_password: str = Field(..., description="Hashed password")
     full_name: str = Field(..., description="User full name")
-    phone: Optional[str] = Field(None, description="User phone number")
+    phone_number: Optional[str] = Field(None, description="User phone number")
     role: UserRole = Field(default=UserRole.CLIENT, description="User role")
     is_active: bool = Field(default=True, description="User active status")
     notification_preference: NotificationPreference = Field(
