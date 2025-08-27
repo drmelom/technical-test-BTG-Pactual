@@ -130,7 +130,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"client@example.com\",\n    \"password\": \"Client123!\",\n    \"full_name\": \"Juan Pérez\",\n    \"phone_number\": \"+57300654321\",\n    \"notification_preference\": \"email\"\n}"
+							"raw": "{\n    \"email\": \"davidmelo@adsfactory.net\",\n    \"password\": \"TestUser123!\",\n    \"full_name\": \"David Melo\",\n    \"phone_number\": \"+573125094344\",\n    \"notification_preference\": \"email\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/auth/register",
@@ -207,7 +207,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"client@example.com\",\n    \"password\": \"Client123!\"\n}"
+							"raw": "{\n    \"email\": \"davidmelo@adsfactory.net\",\n    \"password\": \"TestUser123!\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/auth/login",
@@ -251,7 +251,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"admin@btgpactual.com\",\n    \"password\": \"Admin123!\"\n}"
+							"raw": "{\n    \"email\": \"admin@btgpactual.com\",\n    \"password\": \"Admin123!\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/auth/login",
