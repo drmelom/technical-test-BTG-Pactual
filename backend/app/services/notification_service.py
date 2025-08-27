@@ -140,8 +140,7 @@ class NotificationService:
             """
             message.attach(MIMEText(html_body, "html"))
             
-            async with aiosmtplib.SMTP(hostname="smtp.gmail.com", port=587) as server:
-                await server.starttls()
+            async with aiosmtplib.SMTP(hostname="smtp.gmail.com", port=465, use_tls=True) as server:
                 await server.login(GMAIL_USER, GMAIL_PASSWORD)
                 await server.send_message(message)
             
