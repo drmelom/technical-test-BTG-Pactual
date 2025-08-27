@@ -39,27 +39,32 @@ postman/
 
 ## 🔧 Configuración
 
-### 1. Importar Archivos
+### 1. Importar Colección ⚠️ **SÚPER SIMPLE**
 1. Abrir Postman
 2. Click en **Import**
-3. Seleccionar ambos archivos `.json`
-4. Confirmar importación
+3. **Seleccionar:** `BTG_Pactual_Funds_API.postman_collection.json`
+4. ¡**Ya está listo!** - Todo configurado automáticamente ⭐
 
-### 2. Configurar Entorno
+### ✅ **URLs de Producción YA CONFIGURADAS:**
+- **API Base:** `http://18.205.222.251:8000` ✅
+- **Documentación Swagger:** `http://18.205.222.251:8000/docs` ✅
+- **Health Check:** `http://18.205.222.251:8000/health` ✅
+- **Mongo Express:** `http://18.205.222.251:8081` (admin/admin) ✅
 
-**Para Testing Local:**
-1. Seleccionar el entorno "BTG Pactual - Local Environment"
-2. Verificar que `base_url` apunte a `http://localhost:8000`
+### 🎯 **No necesitas:**
+- ❌ Importar environments adicionales
+- ❌ Configurar variables manualmente  
+- ❌ Seleccionar environments
+- ❌ Cambiar URLs
 
-**Para Testing en Producción (AWS):**
-1. Seleccionar el entorno "BTG Pactual - Production Environment (AWS)"
-2. Verificar que `base_url` apunte a `http://18.205.222.251:8000`
-3. URLs adicionales disponibles:
-   - **Documentación Swagger:** `http://18.205.222.251:8000/docs`
-   - **Health Check:** `http://18.205.222.251:8000/health`
-   - **Mongo Express:** `http://18.205.222.251:8081`
+**Las demás variables** (tokens, user_id) se asignan automáticamente durante la ejecución.
 
-Las demás variables se asignan automáticamente durante la ejecución.
+---
+
+### 📝 **Para Desarrollo Local (Opcional):**
+Si quieres usar entorno local, puedes importar también:
+- `BTG_Pactual_Local_Environment.postman_environment.json`
+- Y seleccionar el environment "Local" en Postman
 
 ### 3. Variables de Entorno Disponibles
 

@@ -87,12 +87,13 @@ curl http://18.205.222.251:8000/health
 # Abrir en navegador: http://18.205.222.251:8000/docs
 ```
 
-### 📱 **Testing con Postman:**
-1. Importar archivos de `postman/`:
-   - `BTG_Pactual_Funds_API.postman_collection.json`
-   - `BTG_Pactual_Production_Environment.postman_environment.json`
-2. Seleccionar environment: **"BTG Pactual - Production Environment (AWS)"**
-3. Ejecutar la colección completa o endpoints individuales
+### 📱 **Cómo probar con Postman:**
+
+1. **Importar SOLO la colección** desde `postman/BTG_Pactual_Funds_API.postman_collection.json` ⭐
+2. **¡Ya está listo!** - La colección viene configurada para la aplicación desplegada
+3. **Ejecutar los requests** - todos apuntan automáticamente a http://18.205.222.251:8000
+
+✅ **No necesitas importar environments adicionales** - Todo está incluido en la colección
 
 ### 🔧 **Servicios configurados:**
 - ✅ **Backend:** FastAPI con autenticación JWT

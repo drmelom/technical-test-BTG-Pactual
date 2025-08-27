@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "btg-pactual-funds-api",
 		"name": "BTG Pactual - Funds Management API",
-		"description": "Colección de Postman para la API de gestión de fondos de BTG Pactual\n\nEsta colección incluye todos los endpoints necesarios para:\n- Autenticación de usuarios (registro y login)\n- Gestión completa de fondos\n- Suscripción y cancelación de fondos\n- Historial de transacciones\n- Notificaciones automáticas\n- Pruebas automatizadas con validaciones\n- Casos de error y manejo de excepciones\n\n**Configuración inicial:**\n1. Importar el entorno BTG_Pactual_Local_Environment.postman_environment.json\n2. Ejecutar el endpoint de Login para obtener el token JWT\n3. El token se guardará automáticamente en la variable de entorno\n4. Usar los demás endpoints con autenticación automática\n5. Ejecutar la colección completa para pruebas automatizadas\n\n**Variables de entorno necesarias:**\n- base_url: URL base de la API (ej: http://localhost:8000)\n- access_token: Token JWT (se asigna automáticamente al hacer login)\n- user_id: ID del usuario autenticado\n- subscription_id: ID de suscripción para pruebas\n- fund_id: ID de fondo para pruebas\n\n**Autor:** BTG Pactual - Technical Test\n**Versión:** 1.2 - Enhanced with comprehensive testing",
+		"description": "Colección de Postman para la API de gestión de fondos de BTG Pactual\n\n🚀 **APLICACIÓN YA DESPLEGADA EN AWS** - Lista para probar directamente\n\nEsta colección incluye todos los endpoints necesarios para:\n- Autenticación de usuarios (registro y login)\n- Gestión completa de fondos\n- Suscripción y cancelación de fondos\n- Historial de transacciones\n- Notificaciones automáticas\n- Pruebas automatizadas con validaciones\n- Casos de error y manejo de excepciones\n\n**✅ CONFIGURACIÓN AUTOMÁTICA:**\n1. ¡Solo importar esta colección y ya está lista!\n2. URLs configuradas para la aplicación desplegada en AWS EC2\n3. Ejecutar el endpoint de Login para obtener el token JWT\n4. El token se guardará automáticamente en la variable\n5. Usar todos los demás endpoints con autenticación automática\n6. Ejecutar la colección completa para pruebas automatizadas\n\n**🌐 URLs de producción configuradas:**\n- base_url: http://18.205.222.251:8000 (AWS EC2)\n- Documentación: http://18.205.222.251:8000/docs\n- Health Check: http://18.205.222.251:8000/health\n- MongoDB Express: http://18.205.222.251:8081\n\n**Variables automáticas:**\n- base_url: Configurada para AWS EC2 ✅\n- access_token: Se asigna automáticamente al hacer login\n- user_id: ID del usuario autenticado\n- subscription_id: ID de suscripción para pruebas\n\n**Autor:** BTG Pactual - Technical Test\n**Versión:** 2.0 - Production Ready (AWS EC2)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -978,7 +978,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:8000",
+			"value": "http://18.205.222.251:8000",
 			"type": "string"
 		}
 	]
