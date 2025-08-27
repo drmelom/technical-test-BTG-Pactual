@@ -7,6 +7,18 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.1"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.1"
+    }
   }
 }
 
@@ -16,16 +28,11 @@ locals {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region  = "us-east-1"
+  profile = "personal"  # Usar perfil personal separado de la empresa
 }
 
 # Variables mínimas necesarias
-variable "key_name" {
-  description = "Nombre de la key pair de AWS (debe existir previamente)"
-  type        = string
-  default     = "your-key-name"  # CAMBIAR por tu key pair existente
-}
-
 variable "your_ip" {
   description = "Tu IP pública para SSH (opcional, por defecto permite todas)"
   type        = string
@@ -36,6 +43,36 @@ variable "repo_url" {
   description = "URL del repositorio GitHub"
   type        = string
   default     = "https://github.com/drmelom/technical-test-BTG-Pactual.git"  # CAMBIAR
+}
+
+# Generar key pair automáticamente
+resource "tls_private_key" "btg_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Crear key pair en AWS usando la key generada
+resource "aws_key_pair" "btg_key" {
+  key_name   = "btg-pactual-${random_string.suffix.result}"
+  public_key = tls_private_key.btg_key.public_key_openssh
+
+  tags = {
+    Name = "BTG Pactual Key"
+  }
+}
+
+# String random para hacer único el nombre del key
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
+
+# Guardar la private key localmente
+resource "local_file" "private_key" {
+  content         = tls_private_key.btg_key.private_key_pem
+  filename        = "${path.module}/btg-pactual-key.pem"
+  file_permission = "0600"
 }
 
 # Security Group
@@ -92,7 +129,7 @@ resource "aws_security_group" "btg_sg" {
 resource "aws_instance" "btg_app" {
   ami           = "ami-0c02fb55956c7d316"  # Amazon Linux 2023
   instance_type = "t3.micro"               # Free tier eligible
-  key_name      = var.key_name
+  key_name      = aws_key_pair.btg_key.key_name
   vpc_security_group_ids = [aws_security_group.btg_sg.id]
 
   # Script que copia el .env completo
@@ -129,7 +166,17 @@ output "instance_ip" {
 
 output "ssh_command" {
   description = "Comando para conectarse por SSH"
-  value       = "ssh -i ~/.ssh/${var.key_name}.pem ec2-user@${aws_eip.btg_ip.public_ip}"
+  value       = "ssh -i ${path.module}/btg-pactual-key.pem ec2-user@${aws_eip.btg_ip.public_ip}"
+}
+
+output "private_key_location" {
+  description = "Ubicación de la clave privada"
+  value       = "${path.module}/btg-pactual-key.pem"
+}
+
+output "key_pair_name" {
+  description = "Nombre del key pair creado en AWS"
+  value       = aws_key_pair.btg_key.key_name
 }
 
 output "api_url" {

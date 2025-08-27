@@ -1,13 +1,16 @@
-# Configuración mínima para despliegue BTG Pactual
-# Terraform lee automáticamente las credenciales del archivo backend/.env
+# Configuración súper simple para despliegue BTG Pactual
+# Terraform crea automáticamente el key pair y lee las credenciales del backend/.env
 
-# AWS Configuration
-key_name = "your-key-name"  # Nombre de tu key pair existente en AWS
-your_ip  = "0.0.0.0/0"      # Tu IP para SSH (opcional)
-
-# Repositorio
+# Repositorio - CAMBIAR URL
 repo_url = "https://github.com/drmelom/technical-test-BTG-Pactual.git"
 
-# ✅ Las credenciales de Gmail y Twilio se leen automáticamente del archivo backend/.env
-# ✅ No necesitas configurar nada más
+# Tu IP para SSH (opcional - 0.0.0.0/0 permite desde cualquier IP)
+your_ip = "0.0.0.0/0"
+
+# ✅ Terraform creará automáticamente:
+#   - Key pair SSH
+#   - Security groups
+#   - EC2 instance
+#   - Elastic IP
+# ✅ Las credenciales se leen del archivo ../backend/.env
 # ✅ Solo ejecuta: terraform apply

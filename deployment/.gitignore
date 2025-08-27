@@ -1,0 +1,14 @@
+# Terraform files
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+
+# SSH keys generadas automáticamente
+*.pem
+*.key
+
+# Logs
+*.log
