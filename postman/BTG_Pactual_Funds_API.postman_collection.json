@@ -172,20 +172,15 @@
 									"        pm.expect(response.token_type).to.equal('bearer');",
 									"    });",
 									"    ",
-									"    pm.test('Response has user information', function () {",
-									"        pm.expect(response).to.have.property('user');",
-									"        pm.expect(response.user).to.have.property('id');",
-									"        pm.expect(response.user).to.have.property('email');",
-									"        pm.expect(response.user).to.have.property('full_name');",
-									"        pm.expect(response.user).to.have.property('balance');",
+									"    pm.test('Response has refresh token', function () {",
+									"        pm.expect(response).to.have.property('refresh_token');",
+									"        pm.expect(response.refresh_token).to.be.a('string');",
 									"    });",
 									"    ",
 									"    pm.environment.set('access_token', response.access_token);",
-									"    pm.environment.set('user_id', response.user.id);",
-									"    pm.environment.set('user_balance', response.user.balance);",
+									"    pm.environment.set('refresh_token', response.refresh_token);",
 									"    ",
-									"    console.log('✅ Login successful, token and user data saved');",
-									"    console.log('User Balance: $' + response.user.balance);",
+									"    console.log('✅ Login successful, tokens saved');",
 									"} else {",
 									"    pm.test('Login error handled properly', function () {",
 									"        pm.expect(pm.response.code).to.be.oneOf([400, 401, 422]);",
@@ -233,7 +228,7 @@
 									"if (pm.response.code === 200) {",
 									"    const response = pm.response.json();",
 									"    pm.environment.set('access_token', response.access_token);",
-									"    pm.environment.set('user_id', response.user.id);",
+									"    pm.environment.set('refresh_token', response.refresh_token);",
 									"    console.log('Admin login successful, token saved');",
 									"}"
 								],
@@ -452,14 +447,14 @@
 							"raw": "{\n    \"fund_id\": 1,\n    \"amount\": 75000\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/transactions/subscribe",
+							"raw": "{{base_url}}/api/v1/funds/subscribe",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"transactions",
+								"funds",
 								"subscribe"
 							]
 						}
@@ -490,14 +485,14 @@
 							"raw": "{\n    \"fund_id\": 3,\n    \"amount\": 100000\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/transactions/subscribe",
+							"raw": "{{base_url}}/api/v1/funds/subscribe",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"transactions",
+								"funds",
 								"subscribe"
 							]
 						}
@@ -546,14 +541,14 @@
 							"raw": "{\n    \"fund_id\": 4,\n    \"amount\": 500000\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/transactions/subscribe",
+							"raw": "{{base_url}}/api/v1/funds/subscribe",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"transactions",
+								"funds",
 								"subscribe"
 							]
 						}
@@ -888,14 +883,14 @@
 							"raw": "{\n    \"fund_id\": 1,\n    \"amount\": 999999999\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/transactions/subscribe",
+							"raw": "{{base_url}}/api/v1/funds/subscribe",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"transactions",
+								"funds",
 								"subscribe"
 							]
 						}
