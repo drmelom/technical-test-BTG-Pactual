@@ -31,9 +31,10 @@ Colección completa de Postman para la API de gestión de fondos de BTG Pactual.
 
 ```
 postman/
-├── BTG_Pactual_Funds_API.postman_collection.json    # Colección principal
-├── BTG_Pactual_Local_Environment.postman_environment.json  # Entorno local
-└── README.md                                         # Esta documentación
+├── BTG_Pactual_Funds_API.postman_collection.json              # Colección principal
+├── BTG_Pactual_Local_Environment.postman_environment.json     # Entorno local
+├── BTG_Pactual_Production_Environment.postman_environment.json # Entorno AWS producción
+└── README.md                                                   # Esta documentación
 ```
 
 ## 🔧 Configuración
@@ -45,21 +46,32 @@ postman/
 4. Confirmar importación
 
 ### 2. Configurar Entorno
-1. Seleccionar el entorno "BTG Pactual Local"
-2. Verificar que `base_url` apunte a tu servidor local
-3. Las demás variables se asignan automáticamente
+
+**Para Testing Local:**
+1. Seleccionar el entorno "BTG Pactual - Local Environment"
+2. Verificar que `base_url` apunte a `http://localhost:8000`
+
+**Para Testing en Producción (AWS):**
+1. Seleccionar el entorno "BTG Pactual - Production Environment (AWS)"
+2. Verificar que `base_url` apunte a `http://18.205.222.251:8000`
+3. URLs adicionales disponibles:
+   - **Documentación Swagger:** `http://18.205.222.251:8000/docs`
+   - **Health Check:** `http://18.205.222.251:8000/health`
+   - **Mongo Express:** `http://18.205.222.251:8081`
+
+Las demás variables se asignan automáticamente durante la ejecución.
 
 ### 3. Variables de Entorno Disponibles
 
-| Variable | Descripción | Valor por Defecto |
-|----------|-------------|-------------------|
-| `base_url` | URL base de la API | `http://localhost:8000` |
-| `access_token` | Token JWT (auto-asignado) | - |
-| `user_id` | ID del usuario logueado | - |
-| `user_balance` | Balance del usuario | - |
-| `subscription_id` | ID de suscripción activa | - |
-| `admin_user_id` | ID del usuario admin | - |
-| `client_user_id` | ID del usuario cliente | - |
+| Variable | Descripción | Valor Local | Valor Producción |
+|----------|-------------|-------------|------------------|
+| `base_url` | URL base de la API | `http://localhost:8000` | `http://18.205.222.251:8000` |
+| `access_token` | Token JWT (auto-asignado) | - | - |
+| `user_id` | ID del usuario logueado | - | - |
+| `subscription_id` | ID de suscripción activa | - | - |
+| `docs_url` | Documentación Swagger | - | `http://18.205.222.251:8000/docs` |
+| `health_url` | Health Check endpoint | - | `http://18.205.222.251:8000/health` |
+| `mongo_express_url` | Interface MongoDB | - | `http://18.205.222.251:8081` |
 
 ## 📊 Estructura de la Colección
 
@@ -155,10 +167,19 @@ pm.test('Subscription creates transaction', function () {
 8. **Error Handling Tests** - Validar manejo de errores
 
 ### Ejecutar Colección Completa:
+
+**Para entorno local:**
 1. Click en la colección "BTG Pactual - Funds Management API"
 2. Click en "Run collection"
-3. Seleccionar entorno "BTG Pactual Local"
+3. Seleccionar entorno "BTG Pactual - Local Environment"
 4. Click en "Run BTG Pactual - Funds Management API"
+
+**Para entorno de producción (AWS):**
+1. Click en la colección "BTG Pactual - Funds Management API"
+2. Click en "Run collection"
+3. Seleccionar entorno "BTG Pactual - Production Environment (AWS)"
+4. Click en "Run BTG Pactual - Funds Management API"
+5. ✅ **¡La aplicación está desplegada y funcionando en AWS EC2!**
 
 ## 📈 Métricas de Success
 
