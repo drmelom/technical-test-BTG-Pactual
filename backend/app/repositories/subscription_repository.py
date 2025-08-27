@@ -76,14 +76,13 @@ class SubscriptionRepository:
         user_id: str, 
         fund_id: int  # Accept int but convert to string
     ) -> Optional[UserFundSubscription]:
-        """Cancel user subscription to fund."""
+        """Cancel user subscription to fund by deleting the record."""
         subscription = await self.get_by_user_and_fund(user_id, fund_id)
         if not subscription:
             return None
         
-        subscription.is_active = False
-        subscription.cancelled_at = datetime.utcnow()
-        await subscription.save()
+        # Delete the subscription record completely to avoid unique index conflicts
+        await subscription.delete()
         return subscription
     
     async def get_fund_subscriptions(
