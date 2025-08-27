@@ -12,7 +12,7 @@ terraform {
 
 # Leer archivo .env local automáticamente
 locals {
-  env_vars = { for tuple in regexall("(.+)=(.+)", file("${path.module}/backend/.env")) : tuple[0] => tuple[1] }
+  env_vars = { for tuple in regexall("(.+)=(.+)", file("${path.module}/../backend/.env")) : tuple[0] => tuple[1] }
 }
 
 provider "aws" {
@@ -98,7 +98,7 @@ resource "aws_instance" "btg_app" {
   # Script que copia el .env completo
   user_data = base64encode(templatefile("${path.module}/user_data_complete.sh", {
     repo_url    = var.repo_url
-    env_content = file("${path.module}/backend/.env")
+    env_content = file("${path.module}/../backend/.env")
   }))
 
   tags = {
